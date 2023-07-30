@@ -16,3 +16,4 @@ python -m torch.distributed.launch --nproc_per_node=<YOUR_NPROC_PER_NODE> main.p
 
 ## Test
 python -m torch.distributed.launch --nproc_per_node=<YOUR_NPROC_PER_NODE> main.py -cfg <YOUR_CONFIG> --output <YOUR_OUTPUT_PATH> --only_test --opts TEST.NUM_CLIP 4 TEST.NUM_CROP 3 --resume <YOUR_MODEL_FILE>
+
