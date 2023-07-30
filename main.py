@@ -248,7 +248,6 @@ def train_one_epoch(epoch, model, criterion, optimizer, lr_scheduler, train_load
 def validate(val_loader, val_data, text_labels, animal_labels, model, config, vis=False):
     model.eval()
     
-    acc1_meter, acc5_meter = AverageMeter(), AverageMeter()
     map_meter = AverageMeter()
     ani_map_meter = AverageMeter()
     
@@ -295,18 +294,14 @@ def validate(val_loader, val_data, text_labels, animal_labels, model, config, vi
             for i in range(n):
                 image = _image[:, i, :, :, :, :] # [b,t,c,h,w]
                 label_id = label_id.cuda(non_blocking=True)
-                # label_id  = one_hot(label_id, config.DATA.NUM_CLASSES)
                 image_input = image.cuda(non_blocking=True)
                 animal_labels = animal_labels.cuda(non_blocking=True)
-                # print(animal_input1)
                 
                 animal_pred = animal_pred.cuda(non_blocking=True) 
-                # print(animal_input)
 
                 if config.TRAIN.OPT_LEVEL == 'O2':
                     image_input = image_input.half()
                 
-                # 从这里开始改 预测动物在训练时也需要改
                 output = model(image_input, text_inputs, animal_labels, animal_pred) # + output
                 # output = model(image_input, text_inputs, imagenet_labels, animal_pred) # + output
                 
@@ -316,19 +311,10 @@ def validate(val_loader, val_data, text_labels, animal_labels, model, config, vi
             values_1, indices_1 = tot_similarity.topk(1, dim=-1)
             values_5, indices_5 = tot_similarity.topk(5, dim=-1)
             
-            ####### 以下为针对多标签进行的修改 #######
-            
             label_id = label_id.reshape((b,-1))
-            # print(animal_gt.shape)
-            
             label_real = []
             bb = []
-            
-            animal_label_real = []
-            bbb = []
-            
             label = torch.nonzero(label_id)
-            animal_label = torch.nonzero(animal_gt)
             
             for i in range(b):
                 for line in label:
@@ -336,19 +322,6 @@ def validate(val_loader, val_data, text_labels, animal_labels, model, config, vi
                         bb.append(line[1])
                 label_real.append(bb)
                 bb = []
-            
-            for i in range(b):
-                for line in animal_label:
-                    if line[0] == i:
-                        bbb.append(line[1])
-                animal_label_real.append(bbb)
-                bbb = []
-
-            acc1, acc5 = 0, 0
-
-            acc1_meter.update(float(acc1) / b * 100, b)
-            acc5_meter.update(float(acc5) / b * 100, b)
-            
             
             if vis == True:
                 print("######## vis start ########")
@@ -362,14 +335,8 @@ def validate(val_loader, val_data, text_labels, animal_labels, model, config, vi
                     for lab in label_real[i]:
                         label = label + '  ' + classes[int(lab)][1]
                     
-                    animal_label = ''
-                    for lab in animal_label_real[i]:
-                        animal_label = animal_label + '  ' + animal_classes[int(lab)][1]
-                    
                     values_5, indices_5 = tot_similarity[i].topk(5, dim=-1)
-                    animal_values_5, animal_indices_5 = animal_pred[i].topk(5, dim=-1)
                     pred = ''
-                    animal_predd = ''
                     for j in range(len(indices_5)):
                         pred = pred + '  ' + classes[indices_5[j]][1]
                     visualize(video, video_read, pred, label)
@@ -383,12 +350,8 @@ def validate(val_loader, val_data, text_labels, animal_labels, model, config, vi
             if idx % config.PRINT_FREQ == 0:
                 logger.info(
                     f'Test: [{idx}/{len(val_loader)}]\t'
-                    # f'Acc@1: {acc1_meter.avg:.3f}\t'
                     # f'Map: {map_meter.avg:.3f}\t'
                 )
-        
-    acc1_meter.sync()
-    acc5_meter.sync()
     
     map = get_map(torch.cat(map_meter.all_preds).cpu().numpy(), torch.cat(map_meter.all_labels).cpu().numpy())
     ani_map = get_map(torch.cat(ani_map_meter.all_preds).cpu().numpy(), torch.cat(ani_map_meter.all_labels).cpu().numpy())
