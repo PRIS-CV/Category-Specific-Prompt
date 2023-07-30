@@ -9,11 +9,10 @@ Animal action recognition has a wide range of applications. However, the task la
 ![](https://github.com/jynkris1016/Category-Specific-Prompt/blob/main/img/visualization.png)
 
 ## Requirements
-pip install -r requirements.txt
+`<pip install -r requirements.txt>`
 
 ## Train
-python -m torch.distributed.launch --nproc_per_node=<YOUR_NPROC_PER_NODE> main.py -cfg <YOUR_CONFIG> --output <YOUR_OUTPUT_PATH> --accumulation-steps 4
+`<python -m torch.distributed.launch --nproc_per_node=<YOUR_NPROC_PER_NODE> main.py -cfg <YOUR_CONFIG> --output <YOUR_OUTPUT_PATH> --accumulation-steps 4>`
 
 ## Test
-python -m torch.distributed.launch --nproc_per_node=<YOUR_NPROC_PER_NODE> main.py -cfg <YOUR_CONFIG> --output <YOUR_OUTPUT_PATH> --only_test --opts TEST.NUM_CLIP 4 TEST.NUM_CROP 3 --resume <YOUR_MODEL_FILE>
-
+`<python -m torch.distributed.launch --nproc_per_node=<YOUR_NPROC_PER_NODE> main.py -cfg <YOUR_CONFIG> --output <YOUR_OUTPUT_PATH> --only_test --opts TEST.NUM_CLIP 4 TEST.NUM_CROP 3 --resume <YOUR_MODEL_FILE>>`
