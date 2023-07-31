@@ -69,7 +69,7 @@ class PromptGeneratorLayer(nn.Module):
         return x
 
 
-class VideoSpecificPrompt(nn.Module):
+class AnimalSpecificPrompt(nn.Module):
     def __init__(self, layers=2, embed_dim=512, alpha=0.1,):
         super().__init__()
         self.norm = nn.LayerNorm(embed_dim)
