@@ -3,7 +3,7 @@ import torch
 from torch import nn
 import numpy as np
 from .mit import MultiframeIntegrationTransformer
-from .prompt import VideoSpecificPrompt
+from .prompt import AnimalSpecificPrompt
 from .cct import CrossFrameCommunicationTransformer
 import sys
 import warnings
@@ -42,8 +42,8 @@ class XCLIP(CLIP):
             context_length, vocab_size, transformer_width, transformer_heads, transformer_layers
         )
         
-        self.prompts_generator1 = VideoSpecificPrompt(layers=prompts_layers, embed_dim=embed_dim, alpha=prompts_alpha,)
-        self.prompts_generator2 = VideoSpecificPrompt(layers=prompts_layers, embed_dim=embed_dim, alpha=prompts_alpha,)
+        self.text_prompts_generator = AnimalSpecificPrompt(layers=prompts_layers, embed_dim=embed_dim, alpha=prompts_alpha,)
+        self.video_prompts_generator = AnimalSpecificPrompt(layers=prompts_layers, embed_dim=embed_dim, alpha=prompts_alpha,)
         self.use_cache=use_cache
         self.mit = MultiframeIntegrationTransformer(T=T, embed_dim=embed_dim, layers=mit_layers,)
 
@@ -166,12 +166,12 @@ class XCLIP(CLIP):
         
         # image_feature: 16,196,512
 
-        text_features = text_features + self.prompts_generator1(text_features, animal_text_feature) # 16, 140, 512     16, 1, 512
+        text_features = text_features + self.text_prompts_generator(text_features, animal_text_feature) # 16, 140, 512     16, 1, 512
         
         # text_feature: 16,140,512
         # video_features: 16,512
         video_features = video_features.unsqueeze(1)
-        video_features = video_features + self.prompts_generator2(video_features, animal_text_feature)
+        video_features = video_features + self.video_prompts_generator2(video_features, animal_text_feature)
         video_features = video_features.squeeze(1)
         
         video_features = video_features / video_features.norm(dim=-1, keepdim=True)
