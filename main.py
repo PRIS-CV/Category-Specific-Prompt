@@ -86,17 +86,30 @@ def main(config):
     model = model.cuda()
 
     mixup_fn = None
+    # if config.AUG.MIXUP > 0:
+    #     criterion = SoftTargetCrossEntropy()
+    #     mixup_fn = CutmixMixupBlending(num_classes=config.DATA.NUM_CLASSES, 
+    #                                    smoothing=config.AUG.LABEL_SMOOTH, 
+    #                                    mixup_alpha=config.AUG.MIXUP, 
+    #                                    cutmix_alpha=config.AUG.CUTMIX, 
+    #                                    switch_prob=config.AUG.MIXUP_SWITCH_PROB)
+    # elif config.AUG.LABEL_SMOOTH > 0:
+    #     criterion = LabelSmoothingCrossEntropy(smoothing=config.AUG.LABEL_SMOOTH)
+    # else:
+    #     criterion = nn.CrossEntropyLoss()
+
+
+    criterion = nn.BCEWithLogitsLoss()
     if config.AUG.MIXUP > 0:
-        criterion = SoftTargetCrossEntropy()
-        mixup_fn = CutmixMixupBlending(num_classes=config.DATA.NUM_CLASSES, 
-                                       smoothing=config.AUG.LABEL_SMOOTH, 
-                                       mixup_alpha=config.AUG.MIXUP, 
-                                       cutmix_alpha=config.AUG.CUTMIX, 
-                                       switch_prob=config.AUG.MIXUP_SWITCH_PROB)
+        mixup_fn = CutmixMixupBlending(num_classes=config.DATA.NUM_CLASSES,
+                                        smoothing=config.AUG.LABEL_SMOOTH,
+                                        mixup_alpha=config.AUG.MIXUP,
+                                        cutmix_alpha=config.AUG.CUTMIX,
+                                        switch_prob=config.AUG.MIXUP_SWITCH_PROB)
     elif config.AUG.LABEL_SMOOTH > 0:
-        criterion = LabelSmoothingCrossEntropy(smoothing=config.AUG.LABEL_SMOOTH)
-    else:
-        criterion = nn.CrossEntropyLoss()
+        mixup_fn = LabelSmoothing(num_classes=config.DATA.NUM_CLASSES,
+                                    smoothing=config.AUG.LABEL_SMOOTH) 
+        
     
     optimizer = build_optimizer(config, model)
     lr_scheduler = build_scheduler(config, optimizer, len(train_loader))
