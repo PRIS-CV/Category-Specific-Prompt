@@ -8,6 +8,10 @@ Animal action recognition has a wide range of applications. However, the task la
 **Some prediction results:**
 ![](https://github.com/jynkris1016/Category-Specific-Prompt/blob/main/img/visualization.png)
 
+## Model
+animal category prediction model: Google Drive https://drive.google.com/file/d/1lZDQR0JdKTyxTB1vQvQ_np9O-m1qKiHn/view?usp=drive_link
+
+action prediction model: Google Drive https://drive.google.com/drive/folders/1xXW14XTyB2JvZR-BbHr0lVFjI6sgZRPx?usp=drive_link
 ## Requirements
 `
 pip install -r requirements.txt
